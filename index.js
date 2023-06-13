@@ -63,6 +63,7 @@ async function run() {
     await client.connect();
     const db = client.db('sportsDb');
     const SportCollection = db.collection('sports');
+    const usersCollection = db.collection('users');
     console.log('Database connected');
 
     // app.post('/jwt', async (req, res) => {
@@ -75,7 +76,7 @@ async function run() {
 
     app.post('/addClass', async (req, res) => {
       const body = req.body;
-    
+
       // Insert the class data into your MongoDB collection
       const result = await SportCollection.insertOne(body);
       console.log(result);
@@ -89,15 +90,35 @@ async function run() {
 
     app.get(`/allData/:id`, async (req, res) => {
       try {
-          const id = req.params.id;
-          const query = { _id: new ObjectId(id) };
-          const result = await SportCollection.findOne(query);
-          res.send(result);
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await SportCollection.findOne(query);
+        res.send(result);
       } catch (error) {
-          console.error('Error retrieving document:', error);
-          res.status(500).send('Internal Server Error');
+        console.error('Error retrieving document:', error);
+        res.status(500).send('Internal Server Error');
       }
     });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+
+      if (existingUser) {
+        return res.send({ message: "User already exists" });
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
 
     // Connect the client to the server (optional starting in v4.7)
     await client.connect();
