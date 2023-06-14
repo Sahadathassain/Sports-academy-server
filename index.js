@@ -4,7 +4,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
-
+const { ObjectId } = require('mongodb');
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -120,16 +120,43 @@ async function run() {
     });
 
 
-// PUT route to update user role
-app.put('/users/:userId/role', (req, res) => {
-  const { userId } = req.params;
-  const { role } = req.body;
+    app.patch("/users/admin/:id",  async (req, res) => {
+      const id = req.params.id;
 
-  // Logic to update the user role in the database or any other desired action
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
-  // Assuming the update was successful, send a response with status 200
-  res.sendStatus(200);
-});
+    app.patch(
+      "/users/instructor/:id",
+
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            role: "instructor",
+          },
+        };
+
+        const result = await usersCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+    );
+
+
+
+
+
+
+
+
 
     // Connect the client to the server (optional starting in v4.7)
     await client.connect();
