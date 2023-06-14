@@ -120,6 +120,17 @@ async function run() {
     });
 
 
+// PUT route to update user role
+app.put('/users/:userId/role', (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  // Logic to update the user role in the database or any other desired action
+
+  // Assuming the update was successful, send a response with status 200
+  res.sendStatus(200);
+});
+
     // Connect the client to the server (optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
