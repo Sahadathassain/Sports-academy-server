@@ -64,6 +64,7 @@ async function run() {
     const db = client.db('sportsDb');
     const SportCollection = db.collection('sports');
     const usersCollection = db.collection('users');
+    const classesCollection= db.collection('classes');
     console.log('Database connected');
 
     
@@ -182,16 +183,28 @@ async function run() {
     );
 
 
-    app.patch(`/allclass/:id`,  async (req, res) => {
+
+    app.patch("/classes/:id",  async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: req.body,
       };
 
-      const result = await SportCollection.updateOne(filter, updateDoc);
+      const result = await classesCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+
+    // app.patch(`/allclass/:id`,  async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updateDoc = {
+    //     $set: req.body,
+    //   };
+
+    //   const result = await SportCollection.updateOne(filter, updateDoc);
+    //   res.send(result);
+    // });
 
     // Selected classes collection
 
@@ -227,7 +240,9 @@ async function run() {
         res.send(result);
       }
     );
-   
+    app.get("/allclass", (req, res) => {
+      res.json(classes);
+    });
 
 
 
