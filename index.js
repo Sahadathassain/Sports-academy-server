@@ -119,8 +119,20 @@ async function run() {
       res.send(result);
     });
 
+    // Endpoint for saving user data
+    app.post("/users", (req, res) => {
+      const userData = req.body.users;
+      users.push(userData);
+      res.status(200).json({ message: "User data saved successfully!" });
+    });
 
-    app.patch("/users/admin/:id",  async (req, res) => {
+    // Endpoint for fetching all saved users
+    app.get("/users", (req, res) => {
+      res.status(200).json(users);
+    });
+
+
+    app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
 
       const filter = { _id: new ObjectId(id) };
@@ -150,6 +162,28 @@ async function run() {
       }
     );
 
+    // class feedback
+    app.patch(
+      "/classes/feedback/:id",
+
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            feedback: req.body.feedback,
+          },
+        };
+
+        try {
+          const result = await SportCollection.updateOne(filter, updateDoc);
+          res.send(result);
+        } catch (error) {
+          console.log("An error occurred:", error);
+          res.status(500).send("Error updating class feedback.");
+        }
+      }
+    );
 
 
 
