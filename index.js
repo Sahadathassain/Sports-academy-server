@@ -66,13 +66,9 @@ async function run() {
     const usersCollection = db.collection('users');
     console.log('Database connected');
 
-    // app.post('/jwt', async (req, res) => {
-    //   const user = req.body;
-    //   const token = await sign(user, env.process.ACCESS_TOKEN_SECRET, {
-    //     expiresIn: '1h',
-    //   });
-    //   res.send({ token });
-    // });
+    
+
+
 
     app.post('/addClass', async (req, res) => {
       const body = req.body;
@@ -186,7 +182,52 @@ async function run() {
     );
 
 
+    app.patch(`/allclass/:id`,  async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: req.body,
+      };
 
+      const result = await SportCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // Selected classes collection
+
+    app.post("/selectedclasses",  async (req, res) => {
+      const classData = req.body;
+      const result = await SportCollection.insertOne(classData);
+      res.send(result);
+    });
+
+    app.get("/selectedclasses",  async (req, res) => {
+      const result = await SportCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get(
+      "/selectedclasses/:email",
+
+      async (req, res) => {
+        const email = req.params.email;
+        const result = await SportCollection
+          .find({ studentEmail: email })
+          .toArray();
+        res.send(result);
+      }
+    );
+    app.get(
+      "/selectedclasses/id/:id",
+
+      async (req, res) => {
+        const result = await SportCollection.findOne({
+          _id: new ObjectId(req.params.id),
+        });
+        res.send(result);
+      }
+    );
+   
 
 
 
