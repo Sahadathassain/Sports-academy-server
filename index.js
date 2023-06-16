@@ -85,6 +85,10 @@ async function run() {
       const result = await classesCollection.find().toArray();
       res.send(result);
     });
+    app.get("/selectedclasses", async (req, res) => {
+      const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
 
     // Endpoint for saving user data
     app.post("/users", (req, res) => {
@@ -154,11 +158,14 @@ async function run() {
 
 
 // Route handler for updating a class
+app.get("/classes", async (req, res) => {
+  const result = await classesCollection.find().toArray();
+  res.send(result);
+});
 
 app.patch(
   "/classes/approve/:id",
-  verifyJWT,
-  verifyAdmin,
+ 
 
   async (req, res) => {
     const id = req.params.id;
@@ -174,7 +181,7 @@ app.patch(
   }
 );
 
-app.patch("/classes/deny/:id", verifyJWT, verifyAdmin, async (req, res) => {
+app.patch("/classes/deny/:id",  async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
   const updateDoc = {
@@ -206,7 +213,7 @@ app.patch(
 );
 
 // Route handler for updating a class
-app.patch("/classes/:id", async (req, res) => {
+app.patch(`/classes/:id`, async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
   const updateDoc = {
@@ -254,7 +261,7 @@ app.get("/classes", async (req, res) => {
 });
 
 
-app.patch("/classes/:id", verifyJWT, verifyAdmin, async (req, res) => {
+app.patch("/classes/:id",  async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
   const updateDoc = {
