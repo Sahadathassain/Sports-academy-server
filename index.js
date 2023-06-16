@@ -195,27 +195,15 @@ async function run() {
       res.send(result);
     });
 
-    // app.patch(`/allclass/:id`,  async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const updateDoc = {
-    //     $set: req.body,
-    //   };
-
-    //   const result = await SportCollection.updateOne(filter, updateDoc);
-    //   res.send(result);
-    // });
-
-    // Selected classes collection
-
+    
     app.post("/selectedclasses",  async (req, res) => {
       const classData = req.body;
-      const result = await SportCollection.insertOne(classData);
+      const result = await classesCollection.insertOne(classData);
       res.send(result);
     });
 
     app.get("/selectedclasses",  async (req, res) => {
-      const result = await SportCollection.find().toArray();
+      const result = await classesCollection.find().toArray();
       res.send(result);
     });
 
@@ -224,7 +212,7 @@ async function run() {
 
       async (req, res) => {
         const email = req.params.email;
-        const result = await SportCollection
+        const result = await classesCollection
           .find({ studentEmail: email })
           .toArray();
         res.send(result);
@@ -234,7 +222,7 @@ async function run() {
       "/selectedclasses/id/:id",
 
       async (req, res) => {
-        const result = await SportCollection.findOne({
+        const result = await classesCollection.findOne({
           _id: new ObjectId(req.params.id),
         });
         res.send(result);
