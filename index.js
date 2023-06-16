@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -9,42 +9,7 @@ const { ObjectId } = require('mongodb');
 app.use(cors());
 app.use(express.json());
 
-// Secret key used to sign and verify JWT tokens
-// const secretKey = process.env.ACCESS_TOKEN_SECRET;
 
-// // Middleware to authenticate JWT tokens
-// const authenticateToken = (req, res, next) => {
-//   const token = req.headers.authorization?.split(' ')[1];
-//   if (token) {
-//     jwt.verify(token, secretKey, (err, decodedToken) => {
-//       if (err) {
-//         return res.sendStatus(403);
-//       }
-//       req.user = decodedToken;
-//       next();
-//     });
-//   } else {
-//     res.sendStatus(401);
-//   }
-// };
-
-// // Route to generate and return a JWT token
-// app.post('/login', (req, res) => {
-//   const { username, password } = req.body;
-//   // TODO: Implement your own logic to validate the username and password
-
-//   if (username === 'admin' && password === 'password') {
-//     const token = jwt.sign({ username }, secretKey);
-//     res.json({ token });
-//   } else {
-//     res.status(401).json({ message: 'Invalid username or password' });
-//   }
-// });
-
-// // Protected route that requires authentication
-// app.get('/protected', authenticateToken, (req, res) => {
-//   res.json({ message: 'Protected data', user: req.user });
-// });
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vwsamp9.mongodb.net/?retryWrites=true&w=majority`;
@@ -116,6 +81,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/Classes", async (req, res) => {
+      const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
+
     // Endpoint for saving user data
     app.post("/users", (req, res) => {
       const userData = req.body.users;
@@ -183,56 +153,117 @@ async function run() {
     );
 
 
+// Route handler for updating a class
 
-    app.patch("/classes/:id",  async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: req.body,
-      };
+app.patch(
+  "/classes/approve/:id",
+  verifyJWT,
+  verifyAdmin,
 
-      const result = await classesCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+  async (req, res) => {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: {
+        status: "approved",
+      },
+    };
 
-    
-    app.post("/selectedclasses",  async (req, res) => {
-      const classData = req.body;
-      const result = await classesCollection.insertOne(classData);
-      res.send(result);
-    });
+    const result = await classesCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  }
+);
 
-    app.get("/selectedclasses",  async (req, res) => {
-      const result = await classesCollection.find().toArray();
-      res.send(result);
-    });
+app.patch("/classes/deny/:id", verifyJWT, verifyAdmin, async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: "denied",
+    },
+  };
 
-    app.get(
-      "/selectedclasses/:email",
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+// class feedback
+app.patch(
+  "/classes/feedback/:id",
+ 
 
-      async (req, res) => {
-        const email = req.params.email;
-        const result = await classesCollection
-          .find({ studentEmail: email })
-          .toArray();
-        res.send(result);
-      }
-    );
-    app.get(
-      "/selectedclasses/id/:id",
+  async (req, res) => {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: {
+        feedback: req.body.feedback,
+      },
+    };
 
-      async (req, res) => {
-        const result = await classesCollection.findOne({
-          _id: new ObjectId(req.params.id),
-        });
-        res.send(result);
-      }
-    );
-    app.get("/allclass", (req, res) => {
-      res.json(classes);
-    });
+    const result = await classesCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  }
+);
+
+// Route handler for updating a class
+app.patch("/classes/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: req.body,
+  };
+
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+
+// Route handler for creating a selected class
+app.post("/selectedclasses", async (req, res) => {
+  const classData = req.body;
+  const result = await classesCollection.insertOne(classData);
+  res.send(result);
+});
+
+// Route handler for retrieving all selected classes
+app.get("/selectedclasses", async (req, res) => {
+  const result = await classesCollection.find().toArray();
+  res.send(result);
+});
+
+// Route handler for retrieving selected classes by email
+app.get("/selectedclasses/:email", async (req, res) => {
+  const email = req.params.email;
+  const result = await classesCollection
+    .find({ studentEmail: email })
+    .toArray();
+  res.send(result);
+});
+
+// Route handler for retrieving selected class by ID
+app.get("/selectedclasses/id/:id", async (req, res) => {
+  const result = await classesCollection.findOne({
+    _id: new ObjectId(req.params.id),
+  });
+  res.send(result);
+});
+
+// Route handler for retrieving all classes
+app.get("/classes", async (req, res) => {
+  const result = await classesCollection.find().toArray();
+  res.send(result);
+});
 
 
+app.patch("/classes/:id", verifyJWT, verifyAdmin, async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: req.body,
+  };
+
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
 
 
 
