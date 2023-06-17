@@ -133,6 +133,29 @@ async function run() {
       }
     );
 
+     app.get("/users/role/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      let role;
+      if (user.role === "admin") {
+        role = "admin";
+      } else if (user.role === "student") {
+        role = "student";
+      } else if (user.role === "instructor") {
+        role = "instructor";
+      } else {
+        role = "unknown";
+      }
+
+      res.send({ role }); // Send the role as a response
+    });
+
     // class feedback
     app.patch(
       "/classes/feedback/:id",
@@ -156,6 +179,9 @@ async function run() {
       }
     );
 
+
+
+   
 
 // Route handler for updating a class
 app.get("/classes", async (req, res) => {
@@ -275,9 +301,9 @@ app.patch("/classes/:id",  async (req, res) => {
 
 
     // Connect the client to the server (optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
+    // await client.db('admin').command({ ping: 1 });
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
   } finally {
     // Ensures that the client will close when you finish/error
