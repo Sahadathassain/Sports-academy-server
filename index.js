@@ -506,6 +506,159 @@ async function run() {
       }
     );
 
+/* =====================================================
+   USER ROLE MANAGEMENT
+   ADMIN IS FIXED
+   ONLY STUDENT <-> INSTRUCTOR IS ALLOWED
+===================================================== */
+
+/* -----------------------------------------------------
+   STUDENT -> INSTRUCTOR
+----------------------------------------------------- */
+
+app.patch(
+  "/users/make-instructor/:email",
+  async (req, res) => {
+    try {
+      const email = decodeURIComponent(
+        req.params.email
+      ).toLowerCase();
+
+      const user =
+        await usersCollection.findOne({
+          email,
+        });
+
+      // USER NOT FOUND
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      // ADMIN IS FIXED
+      if (user.role === "admin") {
+        return res.status(403).json({
+          message:
+            "Admin role cannot be changed.",
+        });
+      }
+
+      // ONLY STUDENT -> INSTRUCTOR
+      if (user.role !== "student") {
+        return res.status(400).json({
+          message:
+            "Only a student can be changed to instructor.",
+        });
+      }
+
+      const result =
+        await usersCollection.updateOne(
+          {
+            email,
+          },
+          {
+            $set: {
+              role: "instructor",
+            },
+          }
+        );
+
+      return res.status(200).json({
+        message:
+          "User role changed to instructor",
+        result,
+      });
+    } catch (error) {
+      console.error(
+        "Instructor role error:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Failed to update user role",
+        error: error.message,
+      });
+    }
+  }
+);
+
+
+/* -----------------------------------------------------
+   INSTRUCTOR -> STUDENT
+----------------------------------------------------- */
+
+app.patch(
+  "/users/make-student/:email",
+  async (req, res) => {
+    try {
+      const email = decodeURIComponent(
+        req.params.email
+      ).toLowerCase();
+
+      const user =
+        await usersCollection.findOne({
+          email,
+        });
+
+      // USER NOT FOUND
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      // ADMIN IS FIXED
+      if (user.role === "admin") {
+        return res.status(403).json({
+          message:
+            "Admin role cannot be changed.",
+        });
+      }
+
+      // ONLY INSTRUCTOR -> STUDENT
+      if (user.role !== "instructor") {
+        return res.status(400).json({
+          message:
+            "Only an instructor can be changed to student.",
+        });
+      }
+
+      const result =
+        await usersCollection.updateOne(
+          {
+            email,
+          },
+          {
+            $set: {
+              role: "student",
+            },
+          }
+        );
+
+      return res.status(200).json({
+        message:
+          "User role changed to student",
+        result,
+      });
+    } catch (error) {
+      console.error(
+        "Student role error:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Failed to update user role",
+        error: error.message,
+      });
+    }
+  }
+);
+
+
+
     /* =====================================================
        CLASSES
     ===================================================== */
